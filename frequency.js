@@ -1,4 +1,9 @@
 (function () {
+  const SEARCH_PLACEHOLDERS = {
+    antigen: { A: 'A2', B: 'B44', C: 'Cw1', DRB1: 'DR4', DQB1: 'DQ7' },
+    allele: { A: '24:02', B: '44:03', C: '01:02', DRB1: '13:02', DQB1: '03:01' },
+  };
+
   const HAPLOTYPE_TYPES = ['A~B~DRB1', 'B~DRB1', 'B~DRB1~DQB1', 'A~B~DRB1~DQB1'];
   const HAPLOTYPE_COLUMNS = {
     'A~B~DRB1': [['a', 'A'], ['b', 'B'], ['drb1', 'DRB1']],
@@ -29,6 +34,11 @@
     const search = document.querySelector(`[data-freq-search="${kind}"]`);
     const tbody = document.querySelector(`[data-freq-table="${kind}"] tbody`);
     if (!select || !search || !tbody) return;
+
+    function syncSearchPlaceholder() {
+      const example = SEARCH_PLACEHOLDERS[kind][select.value];
+      search.placeholder = example ? `e.g. ${example}` : '';
+    }
 
     async function loadRows() {
       const locus = select.value;
@@ -63,7 +73,11 @@
         return;
       }
       select.innerHTML = loci.map((l) => `<option value="${l}">${l}</option>`).join('');
-      select.addEventListener('change', loadRows);
+      syncSearchPlaceholder();
+      select.addEventListener('change', () => {
+        syncSearchPlaceholder();
+        loadRows();
+      });
       search.addEventListener('input', debounce(loadRows, 250));
       await loadRows();
     } catch (err) {
