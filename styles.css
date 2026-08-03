@@ -1,0 +1,231 @@
+:root {
+  --bg-1: #0f0c29;
+  --bg-2: #302b63;
+  --bg-3: #24243e;
+  --accent: #7f5af0;
+  --accent-2: #2cb67d;
+  --text: #f4f4f5;
+  --text-dim: rgba(244, 244, 245, 0.65);
+  --nav-height: 60px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: linear-gradient(120deg, var(--bg-1), var(--bg-2), var(--bg-3));
+  background-size: 300% 300%;
+  animation: gradientShift 18s ease infinite;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  position: relative;
+  padding: calc(var(--nav-height) + 20px) 20px 20px;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Top nav */
+.tabs {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 2vw, 10px);
+  background: rgba(15, 12, 41, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 0 12px;
+  overflow-x: auto;
+}
+
+.tabs a {
+  text-decoration: none;
+  color: var(--text-dim);
+  font-size: clamp(0.75rem, 2.4vw, 0.9rem);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 8px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.tabs a:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tabs a.active {
+  color: var(--text);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+/* Floating orbs for depth */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.orb-1 {
+  width: 380px;
+  height: 380px;
+  background: var(--accent);
+  top: -80px;
+  left: -80px;
+  animation: float1 14s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 320px;
+  height: 320px;
+  background: var(--accent-2);
+  bottom: -100px;
+  right: -60px;
+  animation: float2 16s ease-in-out infinite;
+}
+
+.orb-3 {
+  width: 220px;
+  height: 220px;
+  background: #ff6ec7;
+  bottom: 10%;
+  left: 8%;
+  animation: float3 12s ease-in-out infinite;
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(60px, 40px); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-50px, -30px); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.08); }
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: min(380px, 90vw);
+  min-height: min(380px, 90vw);
+  padding: min(32px, 6vw);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  animation: fadeIn 1.2s ease both;
+}
+
+.card.wide {
+  width: min(560px, 92vw);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.photo-frame {
+  width: clamp(90px, 34vw, 130px);
+  height: clamp(90px, 34vw, 130px);
+  margin: 0 auto 12px;
+  border-radius: 18px;
+  padding: 4px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
+  border: 3px solid var(--bg-3);
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #ffffff, var(--accent-2) 50%, var(--accent));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 6s linear infinite;
+}
+
+@keyframes shine {
+  to { background-position: 200% center; }
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+.divider {
+  width: 48px;
+  height: 3px;
+  margin: 12px auto;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.placeholder-note {
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
