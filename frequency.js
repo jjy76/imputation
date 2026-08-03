@@ -32,8 +32,10 @@
   async function setupSimpleSection(kind) {
     const select = document.querySelector(`[data-freq-locus="${kind}"]`);
     const search = document.querySelector(`[data-freq-search="${kind}"]`);
+    const hint = document.querySelector(`[data-freq-hint="${kind}"]`);
+    const wrap = document.querySelector(`[data-freq-wrap="${kind}"]`);
     const tbody = document.querySelector(`[data-freq-table="${kind}"] tbody`);
-    if (!select || !search || !tbody) return;
+    if (!select || !search || !hint || !wrap || !tbody) return;
 
     function syncSearchPlaceholder() {
       const example = SEARCH_PLACEHOLDERS[kind][select.value];
@@ -42,6 +44,14 @@
 
     async function loadRows() {
       const locus = select.value;
+      if (!locus) {
+        wrap.classList.add('collapsed');
+        hint.classList.remove('hidden');
+        return;
+      }
+      wrap.classList.remove('collapsed');
+      hint.classList.add('hidden');
+
       const q = search.value.trim();
       renderMessage(tbody, 2, 'Loading…');
       try {
@@ -69,38 +79,47 @@
       const loci = data.loci || [];
       if (!loci.length) {
         select.innerHTML = '<option value="">No data yet</option>';
-        renderMessage(tbody, 2, 'No data has been imported yet.');
+        hint.textContent = 'No data has been imported yet.';
         return;
       }
-      select.innerHTML = loci.map((l) => `<option value="${l}">${l}</option>`).join('');
+      select.innerHTML =
+        '<option value="" disabled selected>Select locus</option>' +
+        loci.map((l) => `<option value="${l}">${l}</option>`).join('');
       syncSearchPlaceholder();
       select.addEventListener('change', () => {
         syncSearchPlaceholder();
         loadRows();
       });
       search.addEventListener('input', debounce(loadRows, 250));
-      await loadRows();
     } catch (err) {
       select.innerHTML = '<option value="">Unavailable</option>';
-      renderMessage(tbody, 2, 'Could not load loci.');
+      hint.textContent = 'Could not load loci.';
     }
   }
 
   async function setupHaplotypeSection() {
     const select = document.querySelector('[data-freq-locus="haplotype"]');
     const searchFields = document.querySelector('[data-freq-search-fields="haplotype"]');
+    const hint = document.querySelector('[data-freq-hint="haplotype"]');
+    const wrap = document.querySelector('[data-freq-wrap="haplotype"]');
     const table = document.querySelector('[data-freq-table="haplotype"]');
     const thead = table ? table.querySelector('thead') : null;
     const tbody = table ? table.querySelector('tbody') : null;
-    if (!select || !searchFields || !thead || !tbody) return;
+    if (!select || !searchFields || !hint || !wrap || !thead || !tbody) return;
 
-    select.innerHTML = HAPLOTYPE_TYPES.map((t) => `<option value="${t}">${t}</option>`).join('');
+    select.innerHTML =
+      '<option value="" disabled selected>Select haplotype</option>' +
+      HAPLOTYPE_TYPES.map((t) => `<option value="${t}">${t}</option>`).join('');
 
     function currentSearchInputs() {
       return Array.from(searchFields.querySelectorAll('[data-freq-search-col]'));
     }
 
     function syncSearchFields() {
+      if (!select.value) {
+        searchFields.innerHTML = '';
+        return;
+      }
       const columns = HAPLOTYPE_COLUMNS[select.value];
       const previous = {};
       currentSearchInputs().forEach((input) => {
@@ -127,6 +146,14 @@
 
     async function loadRows() {
       const type = select.value;
+      if (!type) {
+        wrap.classList.add('collapsed');
+        hint.classList.remove('hidden');
+        return;
+      }
+      wrap.classList.remove('collapsed');
+      hint.classList.add('hidden');
+
       const columns = HAPLOTYPE_COLUMNS[type];
       const searchValues = {};
       let hasQuery = false;
@@ -166,12 +193,10 @@
       }
     }
 
-    syncSearchFields();
     select.addEventListener('change', () => {
       syncSearchFields();
       loadRows();
     });
-    await loadRows();
   }
 
   document.addEventListener('DOMContentLoaded', () => {

@@ -9,7 +9,6 @@
 <body class="page-wide">
   <nav class="tabs">
     <a href="index.html">Home</a>
-    <a href="about.html">About</a>
     <a href="frequency.html" class="active">Frequency</a>
     <a href="imputation.html">Imputation</a>
     <a href="cpra-calculator.html">cPRA Calculator</a>
@@ -39,7 +38,8 @@
           <input id="antigen-search" class="freq-search" type="search" placeholder="e.g. A2" data-freq-search="antigen">
         </div>
       </div>
-      <div class="freq-table-wrap">
+      <p class="freq-hint" data-freq-hint="antigen">Select a locus above to view data.</p>
+      <div class="freq-table-wrap collapsed" data-freq-wrap="antigen">
         <table class="freq-table" data-freq-table="antigen">
           <thead>
             <tr><th>Antigen</th><th>Frequency</th></tr>
@@ -63,7 +63,8 @@
           <input id="allele-search" class="freq-search" type="search" placeholder="e.g. 24:02" data-freq-search="allele">
         </div>
       </div>
-      <div class="freq-table-wrap">
+      <p class="freq-hint" data-freq-hint="allele">Select a locus above to view data.</p>
+      <div class="freq-table-wrap collapsed" data-freq-wrap="allele">
         <table class="freq-table" data-freq-table="allele">
           <thead>
             <tr><th>Allele</th><th>Frequency</th></tr>
@@ -84,7 +85,8 @@
         </div>
       </div>
       <div class="freq-controls" data-freq-search-fields="haplotype"></div>
-      <div class="freq-table-wrap">
+      <p class="freq-hint" data-freq-hint="haplotype">Select a haplotype combination above to view data.</p>
+      <div class="freq-table-wrap collapsed" data-freq-wrap="haplotype">
         <table class="freq-table" data-freq-table="haplotype">
           <thead></thead>
           <tbody>
