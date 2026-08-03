@@ -2,6 +2,18 @@ const { sql } = require('../lib/db');
 
 const HAPLOTYPE_TYPES = ['A~B~DRB1', 'B~DRB1', 'B~DRB1~DQB1', 'A~B~DRB1~DQB1'];
 const HAPLOTYPE_LOCUS_COLUMNS = { A: 'a', B: 'b', DRB1: 'drb1', DQB1: 'dqb1' };
+const LOCUS_ORDER = ['A', 'B', 'C', 'DRB1', 'DQB1'];
+
+function sortLoci(loci) {
+  return [...loci].sort((x, y) => {
+    const ix = LOCUS_ORDER.indexOf(x);
+    const iy = LOCUS_ORDER.indexOf(y);
+    if (ix === -1 && iy === -1) return x.localeCompare(y);
+    if (ix === -1) return 1;
+    if (iy === -1) return -1;
+    return ix - iy;
+  });
+}
 
 module.exports = async function handler(req, res) {
   const { kind, locus, type, meta, q } = req.query;
@@ -12,10 +24,8 @@ module.exports = async function handler(req, res) {
       const column = kind === 'antigen' ? 'antigen' : 'allele';
 
       if (meta) {
-        const rows = await sql.query(
-          `SELECT DISTINCT locus FROM ${table} ORDER BY locus`
-        );
-        res.status(200).json({ loci: rows.map((r) => r.locus) });
+        const rows = await sql.query(`SELECT DISTINCT locus FROM ${table}`);
+        res.status(200).json({ loci: sortLoci(rows.map((r) => r.locus)) });
         return;
       }
 
@@ -48,18 +58,18 @@ module.exports = async function handler(req, res) {
       }
 
       const params = [type];
-      let whereQ = '';
-      if (q) {
-        params.push(`%${q}%`);
-        const p = `$${params.length}`;
-        const column = HAPLOTYPE_LOCUS_COLUMNS[locus];
-        whereQ = column
-          ? ` AND ${column} ILIKE ${p}`
-          : ` AND (a ILIKE ${p} OR b ILIKE ${p} OR drb1 ILIKE ${p} OR dqb1 ILIKE ${p})`;
+      const conditions = [];
+      for (const column of Object.values(HAPLOTYPE_LOCUS_COLUMNS)) {
+        const val = req.query[column];
+        if (val) {
+          params.push(`%${val}%`);
+          conditions.push(`${column} ILIKE $${params.length}`);
+        }
       }
+      const whereExtra = conditions.length ? ` AND ${conditions.join(' AND ')}` : '';
 
       const rows = await sql.query(
-        `SELECT a, b, drb1, dqb1, frequency FROM haplotype_frequency WHERE haplotype_type = $1${whereQ} ORDER BY frequency DESC`,
+        `SELECT a, b, drb1, dqb1, frequency FROM haplotype_frequency WHERE haplotype_type = $1${whereExtra} ORDER BY frequency DESC`,
         params
       );
       res.status(200).json({ rows });

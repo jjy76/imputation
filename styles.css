@@ -215,6 +215,15 @@ h1 {
   letter-spacing: 0.04em;
 }
 
+.subtitle a {
+  color: var(--accent-2);
+  text-decoration: none;
+}
+
+.subtitle a:hover {
+  text-decoration: underline;
+}
+
 .divider {
   width: 48px;
   height: 3px;

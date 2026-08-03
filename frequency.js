@@ -74,38 +74,62 @@
 
   async function setupHaplotypeSection() {
     const select = document.querySelector('[data-freq-locus="haplotype"]');
-    const searchLocus = document.querySelector('[data-freq-search-locus="haplotype"]');
-    const search = document.querySelector('[data-freq-search="haplotype"]');
+    const searchFields = document.querySelector('[data-freq-search-fields="haplotype"]');
     const table = document.querySelector('[data-freq-table="haplotype"]');
     const thead = table ? table.querySelector('thead') : null;
     const tbody = table ? table.querySelector('tbody') : null;
-    if (!select || !searchLocus || !search || !thead || !tbody) return;
+    if (!select || !searchFields || !thead || !tbody) return;
 
     select.innerHTML = HAPLOTYPE_TYPES.map((t) => `<option value="${t}">${t}</option>`).join('');
 
-    function syncSearchLocusOptions() {
+    function currentSearchInputs() {
+      return Array.from(searchFields.querySelectorAll('[data-freq-search-col]'));
+    }
+
+    function syncSearchFields() {
       const columns = HAPLOTYPE_COLUMNS[select.value];
-      const previous = searchLocus.value;
-      searchLocus.innerHTML =
-        '<option value="">All loci</option>' +
-        columns.map(([, label]) => `<option value="${label}">${label}</option>`).join('');
-      if (columns.some(([, label]) => label === previous)) {
-        searchLocus.value = previous;
-      }
+      const previous = {};
+      currentSearchInputs().forEach((input) => {
+        previous[input.dataset.freqSearchCol] = input.value;
+      });
+
+      searchFields.innerHTML = columns
+        .map(
+          ([col, label]) => `
+            <div>
+              <label class="freq-label" for="haplotype-search-${col}">Search ${label}</label>
+              <input id="haplotype-search-${col}" class="freq-search" type="search" placeholder="e.g. 02:01" data-freq-search-col="${col}">
+            </div>
+          `
+        )
+        .join('');
+
+      currentSearchInputs().forEach((input) => {
+        const col = input.dataset.freqSearchCol;
+        if (previous[col]) input.value = previous[col];
+        input.addEventListener('input', debounce(loadRows, 250));
+      });
     }
 
     async function loadRows() {
       const type = select.value;
-      const q = search.value.trim();
-      const locus = searchLocus.value;
       const columns = HAPLOTYPE_COLUMNS[type];
+      const searchValues = {};
+      let hasQuery = false;
+      currentSearchInputs().forEach((input) => {
+        const val = input.value.trim();
+        if (val) {
+          searchValues[input.dataset.freqSearchCol] = val;
+          hasQuery = true;
+        }
+      });
+
       thead.innerHTML =
         '<tr>' + columns.map(([, label]) => `<th>${label}</th>`).join('') + '<th>Frequency</th></tr>';
       renderMessage(tbody, columns.length + 1, 'Loading…');
       try {
         const params = new URLSearchParams({ kind: 'haplotype', type });
-        if (q) params.set('q', q);
-        if (q && locus) params.set('locus', locus);
+        for (const [col, val] of Object.entries(searchValues)) params.set(col, val);
         const res = await fetch(`/api/frequency?${params.toString()}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Request failed');
@@ -113,7 +137,7 @@
           renderMessage(
             tbody,
             columns.length + 1,
-            q ? 'No matches for that search.' : 'No data yet for this combination.'
+            hasQuery ? 'No matches for that search.' : 'No data yet for this combination.'
           );
           return;
         }
@@ -128,13 +152,11 @@
       }
     }
 
-    syncSearchLocusOptions();
+    syncSearchFields();
     select.addEventListener('change', () => {
-      syncSearchLocusOptions();
+      syncSearchFields();
       loadRows();
     });
-    searchLocus.addEventListener('change', loadRows);
-    search.addEventListener('input', debounce(loadRows, 250));
     await loadRows();
   }
 
