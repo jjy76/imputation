@@ -229,3 +229,132 @@ h1 {
   color: var(--text-dim);
   line-height: 1.5;
 }
+
+.placeholder-note a {
+  color: var(--accent-2);
+  text-decoration: none;
+}
+
+.placeholder-note a:hover {
+  text-decoration: underline;
+}
+
+/* Wide, scrollable page layout (used by pages with tables/panels
+   instead of a single centered card) */
+body.page-wide {
+  display: block;
+  overflow-y: auto;
+}
+
+.page-header {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.panels {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.panel {
+  padding: min(28px, 5vw);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  animation: fadeIn 1.2s ease both;
+}
+
+.panel h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.freq-label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.freq-select,
+.freq-search {
+  width: 100%;
+  max-width: 240px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.freq-select option {
+  color: #111;
+}
+
+.freq-search::placeholder {
+  color: var(--text-dim);
+}
+
+.freq-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  margin-bottom: 16px;
+}
+
+.freq-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.freq-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.freq-table th,
+.freq-table td {
+  text-align: left;
+  padding: 10px 14px;
+  white-space: nowrap;
+}
+
+.freq-table thead th {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.freq-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.freq-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.freq-empty {
+  color: var(--text-dim);
+  font-style: italic;
+  white-space: normal;
+}
