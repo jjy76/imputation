@@ -157,6 +157,7 @@ body {
 
 .card.wide {
   width: min(560px, 92vw);
+  min-height: 0;
 }
 
 @keyframes fadeIn {
@@ -230,6 +231,35 @@ h1 {
   margin: 12px auto;
   border-radius: 2px;
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.disclaimer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(560px, 92vw);
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(255, 191, 71, 0.1);
+  border: 1px solid rgba(255, 191, 71, 0.35);
+  color: #ffcf7a;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.disclaimer-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #ffcf7a;
+}
+
+.disclaimer strong {
+  color: #ffdb99;
 }
 
 .placeholder-note {
