@@ -77,7 +77,27 @@
     </section>
 
     <section class="panel">
-      <h2>Common Haplotype Frequency</h2>
+      <h2>Antigen - Common Haplotype Frequency</h2>
+      <div class="freq-controls">
+        <div>
+          <label class="freq-label" for="antigen-haplotype-type">Haplotype</label>
+          <select id="antigen-haplotype-type" class="freq-select" data-freq-locus="antigen-haplotype"></select>
+        </div>
+      </div>
+      <div class="freq-controls" data-freq-search-fields="antigen-haplotype"></div>
+      <p class="freq-hint" data-freq-hint="antigen-haplotype">Select a haplotype combination above to view data.</p>
+      <div class="freq-table-wrap collapsed" data-freq-wrap="antigen-haplotype">
+        <table class="freq-table" data-freq-table="antigen-haplotype">
+          <thead></thead>
+          <tbody>
+            <tr><td class="freq-empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Allele - Common Haplotype Frequency</h2>
       <div class="freq-controls">
         <div>
           <label class="freq-label" for="haplotype-type">Haplotype</label>

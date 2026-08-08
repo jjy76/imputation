@@ -4,12 +4,43 @@
     allele: { A: '24:02', B: '44:03', C: '01:02', DRB1: '13:02', DQB1: '03:01' },
   };
 
-  const HAPLOTYPE_TYPES = ['A~B~DRB1', 'B~DRB1', 'B~DRB1~DQB1', 'A~B~DRB1~DQB1'];
+  const HAPLOTYPE_SEPARATOR = '---';
+  const HAPLOTYPE_TYPES = [
+    'A~B~DRB1', 'B~DRB1', 'B~DRB1~DQB1', 'A~B~DRB1~DQB1',
+    HAPLOTYPE_SEPARATOR,
+    // -- added: full A/B/C/DRB1/DQB1 loci combinations --
+    'A~B', 'A~C', 'A~DRB1', 'A~DQB1', 'B~C', 'B~DQB1', 'C~DRB1', 'C~DQB1', 'DRB1~DQB1',
+    'A~B~C', 'A~B~DQB1', 'A~C~DRB1', 'A~C~DQB1', 'A~DRB1~DQB1', 'B~C~DRB1', 'B~C~DQB1', 'C~DRB1~DQB1',
+    'A~B~C~DRB1', 'A~B~C~DQB1', 'A~C~DRB1~DQB1', 'B~C~DRB1~DQB1',
+    'A~B~C~DRB1~DQB1',
+  ];
   const HAPLOTYPE_COLUMNS = {
     'A~B~DRB1': [['a', 'A'], ['b', 'B'], ['drb1', 'DRB1']],
     'B~DRB1': [['b', 'B'], ['drb1', 'DRB1']],
     'B~DRB1~DQB1': [['b', 'B'], ['drb1', 'DRB1'], ['dqb1', 'DQB1']],
     'A~B~DRB1~DQB1': [['a', 'A'], ['b', 'B'], ['drb1', 'DRB1'], ['dqb1', 'DQB1']],
+    'A~B': [['a', 'A'], ['b', 'B']],
+    'A~C': [['a', 'A'], ['c', 'C']],
+    'A~DRB1': [['a', 'A'], ['drb1', 'DRB1']],
+    'A~DQB1': [['a', 'A'], ['dqb1', 'DQB1']],
+    'B~C': [['b', 'B'], ['c', 'C']],
+    'B~DQB1': [['b', 'B'], ['dqb1', 'DQB1']],
+    'C~DRB1': [['c', 'C'], ['drb1', 'DRB1']],
+    'C~DQB1': [['c', 'C'], ['dqb1', 'DQB1']],
+    'DRB1~DQB1': [['drb1', 'DRB1'], ['dqb1', 'DQB1']],
+    'A~B~C': [['a', 'A'], ['b', 'B'], ['c', 'C']],
+    'A~B~DQB1': [['a', 'A'], ['b', 'B'], ['dqb1', 'DQB1']],
+    'A~C~DRB1': [['a', 'A'], ['c', 'C'], ['drb1', 'DRB1']],
+    'A~C~DQB1': [['a', 'A'], ['c', 'C'], ['dqb1', 'DQB1']],
+    'A~DRB1~DQB1': [['a', 'A'], ['drb1', 'DRB1'], ['dqb1', 'DQB1']],
+    'B~C~DRB1': [['b', 'B'], ['c', 'C'], ['drb1', 'DRB1']],
+    'B~C~DQB1': [['b', 'B'], ['c', 'C'], ['dqb1', 'DQB1']],
+    'C~DRB1~DQB1': [['c', 'C'], ['drb1', 'DRB1'], ['dqb1', 'DQB1']],
+    'A~B~C~DRB1': [['a', 'A'], ['b', 'B'], ['c', 'C'], ['drb1', 'DRB1']],
+    'A~B~C~DQB1': [['a', 'A'], ['b', 'B'], ['c', 'C'], ['dqb1', 'DQB1']],
+    'A~C~DRB1~DQB1': [['a', 'A'], ['c', 'C'], ['drb1', 'DRB1'], ['dqb1', 'DQB1']],
+    'B~C~DRB1~DQB1': [['b', 'B'], ['c', 'C'], ['drb1', 'DRB1'], ['dqb1', 'DQB1']],
+    'A~B~C~DRB1~DQB1': [['a', 'A'], ['b', 'B'], ['c', 'C'], ['drb1', 'DRB1'], ['dqb1', 'DQB1']],
   };
 
   function renderMessage(tbody, colspan, message) {
@@ -97,19 +128,23 @@
     }
   }
 
-  async function setupHaplotypeSection() {
-    const select = document.querySelector('[data-freq-locus="haplotype"]');
-    const searchFields = document.querySelector('[data-freq-search-fields="haplotype"]');
-    const hint = document.querySelector('[data-freq-hint="haplotype"]');
-    const wrap = document.querySelector('[data-freq-wrap="haplotype"]');
-    const table = document.querySelector('[data-freq-table="haplotype"]');
+  async function setupHaplotypeSection(kind, placeholders) {
+    const select = document.querySelector(`[data-freq-locus="${kind}"]`);
+    const searchFields = document.querySelector(`[data-freq-search-fields="${kind}"]`);
+    const hint = document.querySelector(`[data-freq-hint="${kind}"]`);
+    const wrap = document.querySelector(`[data-freq-wrap="${kind}"]`);
+    const table = document.querySelector(`[data-freq-table="${kind}"]`);
     const thead = table ? table.querySelector('thead') : null;
     const tbody = table ? table.querySelector('tbody') : null;
     if (!select || !searchFields || !hint || !wrap || !thead || !tbody) return;
 
     select.innerHTML =
       '<option value="" disabled selected>Select haplotype</option>' +
-      HAPLOTYPE_TYPES.map((t) => `<option value="${t}">${t}</option>`).join('');
+      HAPLOTYPE_TYPES.map((t) =>
+        t === HAPLOTYPE_SEPARATOR
+          ? '<option disabled>──────────</option>'
+          : `<option value="${t}">${t}</option>`
+      ).join('');
 
     function currentSearchInputs() {
       return Array.from(searchFields.querySelectorAll('[data-freq-search-col]'));
@@ -127,14 +162,16 @@
       });
 
       searchFields.innerHTML = columns
-        .map(
-          ([col, label]) => `
+        .map(([col, label]) => {
+          const example = placeholders[label];
+          const placeholder = example ? `e.g. ${example}` : '';
+          return `
             <div>
-              <label class="freq-label" for="haplotype-search-${col}">Search ${label}</label>
-              <input id="haplotype-search-${col}" class="freq-search" type="search" placeholder="e.g. 02:01" data-freq-search-col="${col}">
+              <label class="freq-label" for="${kind}-search-${col}">Search ${label}</label>
+              <input id="${kind}-search-${col}" class="freq-search" type="search" placeholder="${placeholder}" data-freq-search-col="${col}">
             </div>
-          `
-        )
+          `;
+        })
         .join('');
 
       currentSearchInputs().forEach((input) => {
@@ -169,7 +206,7 @@
         '<tr>' + columns.map(([, label]) => `<th>${label}</th>`).join('') + '<th>Frequency</th></tr>';
       renderMessage(tbody, columns.length + 1, 'Loading…');
       try {
-        const params = new URLSearchParams({ kind: 'haplotype', type });
+        const params = new URLSearchParams({ kind, type });
         for (const [col, val] of Object.entries(searchValues)) params.set(col, val);
         const res = await fetch(`/api/frequency?${params.toString()}`);
         const data = await res.json();
@@ -202,6 +239,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     setupSimpleSection('antigen');
     setupSimpleSection('allele');
-    setupHaplotypeSection();
+    setupHaplotypeSection('antigen-haplotype', SEARCH_PLACEHOLDERS.antigen);
+    setupHaplotypeSection('haplotype', SEARCH_PLACEHOLDERS.allele);
   });
 })();

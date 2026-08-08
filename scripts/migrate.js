@@ -30,12 +30,28 @@ async function migrate() {
       haplotype_type TEXT NOT NULL,
       a TEXT,
       b TEXT,
+      c TEXT,
       drb1 TEXT,
       dqb1 TEXT,
       frequency NUMERIC NOT NULL
     )
   `;
+  await sql`ALTER TABLE haplotype_frequency ADD COLUMN IF NOT EXISTS c TEXT`;
   await sql`CREATE INDEX IF NOT EXISTS idx_haplotype_frequency_type ON haplotype_frequency (haplotype_type)`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS antigen_haplotype_frequency (
+      id SERIAL PRIMARY KEY,
+      haplotype_type TEXT NOT NULL,
+      a TEXT,
+      b TEXT,
+      c TEXT,
+      drb1 TEXT,
+      dqb1 TEXT,
+      frequency NUMERIC NOT NULL
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_antigen_haplotype_frequency_type ON antigen_haplotype_frequency (haplotype_type)`;
 
   console.log('Migration complete.');
 }

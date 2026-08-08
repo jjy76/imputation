@@ -7,8 +7,15 @@ loadEnvLocal();
 const { sql } = require('../lib/db');
 const { parseCsv } = require('./parse-csv');
 
-const HAPLOTYPE_TYPES = ['A~B~DRB1', 'B~DRB1', 'B~DRB1~DQB1', 'A~B~DRB1~DQB1'];
-const HAPLOTYPE_LOCI = { a: 'A', b: 'B', drb1: 'DRB1', dqb1: 'DQB1' };
+const HAPLOTYPE_TYPES = [
+  'A~B~DRB1', 'B~DRB1', 'B~DRB1~DQB1', 'A~B~DRB1~DQB1',
+  // -- added: full A/B/C/DRB1/DQB1 loci combinations --
+  'A~B', 'A~C', 'A~DRB1', 'A~DQB1', 'B~C', 'B~DQB1', 'C~DRB1', 'C~DQB1', 'DRB1~DQB1',
+  'A~B~C', 'A~B~DQB1', 'A~C~DRB1', 'A~C~DQB1', 'A~DRB1~DQB1', 'B~C~DRB1', 'B~C~DQB1', 'C~DRB1~DQB1',
+  'A~B~C~DRB1', 'A~B~C~DQB1', 'A~C~DRB1~DQB1', 'B~C~DRB1~DQB1',
+  'A~B~C~DRB1~DQB1',
+];
+const HAPLOTYPE_LOCI = { a: 'A', b: 'B', c: 'C', drb1: 'DRB1', dqb1: 'DQB1' };
 
 function readCsv(filePath) {
   const resolved = path.resolve(filePath);
@@ -64,22 +71,25 @@ function toHaplotypeRow(r, haplotypeType, rowNum) {
   return row;
 }
 
-async function insertHaplotypeRows(haplotypeType, rows) {
-  await sql`DELETE FROM haplotype_frequency WHERE haplotype_type = ${haplotypeType}`;
+const HAPLOTYPE_TABLES = { haplotype: 'haplotype_frequency', 'antigen-haplotype': 'antigen_haplotype_frequency' };
+
+async function insertHaplotypeRows(table, haplotypeType, rows) {
+  await sql.query(`DELETE FROM ${table} WHERE haplotype_type = $1`, [haplotypeType]);
   for (const row of rows) {
-    await sql`
-      INSERT INTO haplotype_frequency (haplotype_type, a, b, drb1, dqb1, frequency)
-      VALUES (${row.haplotype_type}, ${row.a}, ${row.b}, ${row.drb1}, ${row.dqb1}, ${row.frequency})
-    `;
+    await sql.query(
+      `INSERT INTO ${table} (haplotype_type, a, b, c, drb1, dqb1, frequency) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [row.haplotype_type, row.a, row.b, row.c, row.drb1, row.dqb1, row.frequency]
+    );
   }
-  console.log(`Imported ${rows.length} haplotype frequency rows for ${haplotypeType}.`);
+  console.log(`Imported ${rows.length} rows into ${table} for ${haplotypeType}.`);
 }
 
 // Supports two CSV shapes:
 // 1. A combined file with a "Type" column covering multiple haplotype
 //    combos (each combo's rows replaced independently).
 // 2. A single-combo file, paired with an explicit haplotypeType argument.
-async function importHaplotype(filePath, haplotypeType) {
+async function importHaplotype(kind, filePath, haplotypeType) {
+  const table = HAPLOTYPE_TABLES[kind];
   const records = readCsv(filePath);
   const hasTypeColumn = records.length > 0 && 'type' in records[0];
 
@@ -95,7 +105,7 @@ async function importHaplotype(filePath, haplotypeType) {
     });
 
     for (const [type, rows] of byType) {
-      await insertHaplotypeRows(type, rows);
+      await insertHaplotypeRows(table, type, rows);
     }
     return;
   }
@@ -112,7 +122,7 @@ async function importHaplotype(filePath, haplotypeType) {
   }
 
   const rows = records.map((r, i) => toHaplotypeRow(r, haplotypeType, i + 2));
-  await insertHaplotypeRows(haplotypeType, rows);
+  await insertHaplotypeRows(table, haplotypeType, rows);
 }
 
 async function main() {
@@ -123,8 +133,10 @@ async function main() {
       'Usage:\n' +
         '  node scripts/import-frequency.js antigen <file.csv>\n' +
         '  node scripts/import-frequency.js allele <file.csv>\n' +
-        '  node scripts/import-frequency.js haplotype <file.csv>              (file has a "Type" column)\n' +
-        '  node scripts/import-frequency.js haplotype <file.csv> "A~B~DRB1"   (single-combo file)'
+        '  node scripts/import-frequency.js haplotype <file.csv>                       (file has a "Type" column)\n' +
+        '  node scripts/import-frequency.js haplotype <file.csv> "A~B~DRB1"            (single-combo file)\n' +
+        '  node scripts/import-frequency.js antigen-haplotype <file.csv>               (file has a "Type" column)\n' +
+        '  node scripts/import-frequency.js antigen-haplotype <file.csv> "A~B~DRB1"    (single-combo file)'
     );
     process.exit(1);
   }
@@ -133,10 +145,10 @@ async function main() {
     await importAntigen(filePath);
   } else if (kind === 'allele') {
     await importAllele(filePath);
-  } else if (kind === 'haplotype') {
-    await importHaplotype(filePath, extra);
+  } else if (kind === 'haplotype' || kind === 'antigen-haplotype') {
+    await importHaplotype(kind, filePath, extra);
   } else {
-    console.error(`Unknown kind "${kind}". Expected: antigen | allele | haplotype`);
+    console.error(`Unknown kind "${kind}". Expected: antigen | allele | haplotype | antigen-haplotype`);
     process.exit(1);
   }
 }
